@@ -27,9 +27,16 @@ script:
   # with no letters. We had to pass version by setting VERSION.
   # We set VERSION like: major.minor.number_of_commits above
   # last major.minor tag.
-  - git describe --tags
+  - git describe --long --tags
   - git clone https://github.com/packpack/packpack.git packpack;
-  - VERSION=`git describe --tags | sed -e 's/^v\(.*\)-.*/\1/' -e 's/-/./'`
+  # v0.1.1-0-ga4617d9 -> 0.1.1.0 or v0.1-0-ga4617d9 -> 0.1.0
+  # 0.1.0 -> 0.1.0.0
+  - |
+    VERSION=`git describe --long --tags | sed \
+      -e 's/^v\([^-]\+\)-\([0-9]\+\)-\(g.\+\)/\1.\2/' \
+      -e 's/^\([0-9]\+\.[0-9]\+\)\.\([0-9]\+\)$/\1.0.\2/'`
+  - |
+    echo "Package version: ${VERSION}"
   - VERSION=$VERSION packpack/packpack;
 
 before_deploy:
